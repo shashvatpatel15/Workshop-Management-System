@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+  html,
+  body {
+    @apply h-full m-0 p-0 font-sans text-slate-800 bg-slate-50 flex items-stretch justify-center;
+  }
+}
+
+@layer components {
+
+  /* Layout */
+  .app-shell {
+    @apply w-full max-w-[1120px] m-5 rounded-[26px] bg-white border border-slate-200 shadow-soft flex flex-col overflow-hidden;
+  }
+
+  .main-content {
+    @apply p-[18px_22px_20px] flex flex-col gap-[18px];
+    background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.04), transparent 55%), radial-gradient(circle at 100% 0, rgba(99, 102, 241, 0.06), transparent 65%);
+  }
+
+  /* Typography */
+  .muted {
+    @apply m-0 text-[13px] text-slate-500;
+  }
+
+  /* Form Elements */
+  .field {
+    @apply flex flex-col gap-[6px] min-w-0;
+  }
+
+  .field label {
+    @apply text-[12px] font-semibold text-slate-600;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    @apply rounded-xl border border-slate-300 bg-white p-[9px_11px] text-slate-800 text-[14px] outline-none transition-all duration-150 ease-in-out shadow-sm;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    @apply border-indigo-400 shadow-[0_0_0_2px_rgba(99, 102, 241, 0.2)];
+  }
+
+  /* Chips */
+  .chip {
+    @apply rounded-full px-3 py-1 text-xs bg-white border border-slate-200 text-slate-600 inline-flex items-center gap-[6px] cursor-pointer transition-all duration-150 shadow-sm hover:shadow-md;
+  }
+
+  .chip:hover {
+    @apply bg-slate-50 text-indigo-700 border-indigo-200;
+  }
+
+  .chip-dot {
+    @apply w-1.5 h-1.5 rounded-full bg-slate-400;
+  }
+
+  .chip.active {
+    @apply bg-indigo-50 border-indigo-300 text-indigo-700 shadow-sm;
+  }
+
+  /* Buttons */
+  .primary-button {
+    @apply rounded-full border-none bg-accent-gradient text-white px-4 py-2 text-[13px] font-medium cursor-pointer inline-flex items-center gap-1.5 transition-all duration-150 shadow-md;
+  }
+
+  .primary-button:hover:not(:disabled) {
+    @apply -translate-y-[0.5px] brightness-105 shadow-lg;
+  }
+
+  .primary-button:disabled {
+    @apply opacity-60 cursor-not-allowed shadow-none;
+  }
+
+  .ghost-button {
+    @apply rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-600 text-xs cursor-pointer inline-flex items-center gap-1.5 transition-all duration-150 shadow-sm hover:shadow-md;
+  }
+
+  .ghost-button:hover {
+    @apply bg-slate-50 text-indigo-700 border-indigo-200 -translate-y-[0.5px];
+  }
+
+  .icon-button {
+    @apply rounded-full border border-slate-200 bg-white text-slate-500 w-7 h-7 inline-flex items-center justify-center cursor-pointer text-sm transition-all duration-150 hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-600 hover:-translate-y-[0.5px] shadow-sm;
+  }
+
+  /* Workshop Cards */
+  .workshop-card {
+    @apply relative rounded-[18px] border border-slate-200 p-[12px_12px_11px] flex flex-col gap-[7px] shadow-subtle overflow-hidden bg-white;
+  }
+
+  .workshop-card::before {
+    content: "";
+    @apply absolute inset-0 opacity-40 pointer-events-none;
+    background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.05), transparent 60%);
+  }
+
+  .badge {
+    @apply px-2 py-1 rounded-full text-[11px] inline-flex items-center gap-1.5 border border-slate-200 bg-slate-50 text-slate-600;
+  }
+
+  .badge-pill {
+    @apply bg-indigo-50 text-indigo-700 border-indigo-200;
+  }
+
+  .badge-dot {
+    @apply w-[7px] h-[7px] rounded-full bg-emerald-500 shadow-sm;
+  }
+
+  .status-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-[9px] py-1 text-[11px] border border-slate-200 bg-white text-slate-600 font-medium shadow-sm;
+  }
+
+  .status-pill.upcoming {
+    @apply border-emerald-200 text-emerald-700 bg-emerald-50;
+  }
+
+  .status-pill.full {
+    @apply border-red-200 text-red-700 bg-red-50;
+  }
+
+  .topic-pill {
+    @apply rounded-full px-2 py-0.5 text-[11px] bg-slate-100 border border-slate-200 text-slate-600;
+  }
+
+  /* Modals */
+  .modal-backdrop {
+    @apply absolute inset-0 backdrop-blur-sm bg-slate-900/40;
+  }
+
+  .modal-dialog {
+    @apply relative w-full max-w-[460px] mx-4 rounded-[22px] border border-white shadow-soft p-[14px_16px_14px] bg-white;
+  }
+}
