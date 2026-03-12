@@ -11,6 +11,7 @@ node_modules/
 # Production building
 frontend/dist/
 frontend/build/
+frontend/.env
 
 # Logs
 logs

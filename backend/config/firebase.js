@@ -1,20 +1,11 @@
-const admin = require('firebase-admin');
-require('dotenv').config();
+const admin = require("firebase-admin");
 
-// Load Firebase service account key
-const serviceAccount = require('./serviceAccountKey.json');
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-    });
-}
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
-// Firestore database
 const db = admin.firestore();
-
-// Prevent errors if undefined fields are sent
-db.settings({ ignoreUndefinedProperties: true });
 
 module.exports = db;
