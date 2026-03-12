@@ -3,8 +3,10 @@ const router = express.Router();
 const auth = require('../middlewares/authMiddleware');
 const workshopController = require('../controllers/workshopController');
 
-// Public route to get all open workshops for colleagues
+// Public routes
 router.get('/', workshopController.getAllWorkshops);
+router.get('/stats', workshopController.getStats);
+router.get('/:id', workshopController.getWorkshopById);
 
 // Protected routes
 router.post('/', auth, workshopController.createWorkshop);

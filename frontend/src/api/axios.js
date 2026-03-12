@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+// For Vercel deployment, use VITE_API_BASE_URL env var
+// For local dev, fallback to localhost:5000
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api', // Adjust if backend port changes
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
 });
 
 // Add a request interceptor to append JWT token

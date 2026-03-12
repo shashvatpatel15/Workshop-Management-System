@@ -1,118 +1,117 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { LogIn, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email || !password) {
-            return setError('Please fill in all fields');
-        }
+        setLoading(true);
+        setError('');
 
         try {
-            setError('');
-            setLoading(true);
-            await login(email, password);
+            await login(formData.email, formData.password);
             navigate('/');
         } catch (err) {
-            setError('Failed to log in. Please check your credentials.');
+            setError(err.response?.data?.message || 'Invalid email or password');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-md mx-auto w-full mt-10 p-8 bg-white border border-slate-200 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] overflow-hidden relative"
-        >
-            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-indigo-50 to-purple-50 opacity-80 pointer-events-none" />
-
-            <div className="relative z-10">
-                <div className="w-16 h-16 bg-white border border-slate-200 rounded-2xl flex items-center justify-center mx-auto shadow-sm mb-6">
-                    <LogIn size={28} className="text-indigo-600" />
+        <div className="min-h-[80vh] flex items-center justify-center px-4">
+            <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-md w-full bg-white border border-slate-200 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] overflow-hidden"
+            >
+                {/* Header gradient */}
+                <div className="relative h-32 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 flex items-end p-6">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-[40px] -mr-16 -mt-16" />
+                    <div className="relative z-10 flex items-center gap-3">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20">
+                            <LogIn size={22} className="text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-extrabold text-white">Welcome Back</h2>
+                            <p className="text-indigo-200 text-xs font-medium">Sign in to your account</p>
+                        </div>
+                    </div>
                 </div>
 
-                <h2 className="text-center text-3xl font-extrabold text-slate-800 tracking-tight mb-2">
-                    Welcome Back
-                </h2>
-                <p className="text-center text-sm text-slate-500 font-medium mb-8">
-                    Log in to access your workshops and connect with colleagues.
-                </p>
+                <div className="p-6">
+                    {error && (
+                        <div className="p-3 mb-6 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium">
+                            {error}
+                        </div>
+                    )}
 
-                {error && (
-                    <div className="p-3 mb-6 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium text-center shadow-sm">
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="space-y-1.5">
-                        <label className="block text-sm font-bold text-slate-700">
-                            Company Email
-                        </label>
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Mail size={16} className="text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                            </div>
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-bold text-slate-700">Email Address</label>
                             <input
                                 type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
                                 required
-                                className="block w-full pl-10 bg-white border border-slate-200 rounded-xl text-slate-800 py-2.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400 shadow-sm"
-                                placeholder="you@company.com"
+                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+                                placeholder="you@college.edu"
                             />
                         </div>
-                    </div>
 
-                    <div className="space-y-1.5">
-                        <label className="block text-sm font-bold text-slate-700">
-                            Password
-                        </label>
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Lock size={16} className="text-slate-400 group-focus-within:text-purple-500 transition-colors" />
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-bold text-slate-700">Password</label>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 pr-12 text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+                                    placeholder="Enter your password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                className="block w-full pl-10 bg-white border border-slate-200 rounded-xl text-slate-800 py-2.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400 shadow-sm"
-                                placeholder="••••••••"
-                            />
                         </div>
-                    </div>
 
-                    <div className="pt-2">
                         <button
                             disabled={loading}
                             type="submit"
-                            className="w-full flex justify-center items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 rounded-xl transition-all shadow-md shadow-indigo-600/20 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 hover:-translate-y-[1px]"
+                            className="w-full flex justify-center items-center gap-2 px-6 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 rounded-xl transition-all shadow-md shadow-indigo-600/20"
                         >
-                            {loading ? 'Logging in...' : 'Log In'} <ArrowRight size={16} />
+                            {loading ? 'Signing In...' : 'Sign In'} <ArrowRight size={16} />
                         </button>
-                    </div>
-                </form>
+                    </form>
 
-                <p className="mt-8 text-center text-sm text-slate-500 font-medium">
-                    Don't have an account?{' '}
-                    <Link to="/signup" className="text-indigo-600 font-bold hover:text-indigo-700 hover:underline">
-                        Sign up
-                    </Link>
-                </p>
-            </div>
-        </motion.div>
+                    <p className="text-center text-sm text-slate-500 mt-6 font-medium">
+                        Don't have an account?{' '}
+                        <Link to="/signup" className="text-indigo-600 font-bold hover:underline">
+                            Create one here
+                        </Link>
+                    </p>
+                </div>
+            </motion.div>
+        </div>
     );
 }

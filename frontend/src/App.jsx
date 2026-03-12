@@ -11,6 +11,8 @@ import CreateWorkshopPage from "./pages/CreateWorkshopPage";
 import EditWorkshopPage from "./pages/EditWorkshopPage";
 import ProfilePage from "./pages/ProfilePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import WorkshopDetailPage from "./pages/WorkshopDetailPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -24,6 +26,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/workshop/:id" element={<WorkshopDetailPage />} />
               <Route
                 path="/my-registrations"
                 element={
@@ -64,6 +67,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              {/* 404 Catch-all */}
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </main>
           <Footer />

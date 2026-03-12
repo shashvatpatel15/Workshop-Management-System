@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRegistrations } from '../hooks/useRegistrations';
-import { Bookmark, Calendar, Building, Mail, FileText, ArrowRight } from 'lucide-react';
+import { Bookmark, Calendar, Building, Mail, FileText, ArrowRight, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import OrganizedWorkshopsList from '../components/OrganizedWorkshopsList';
 
 export default function MyRegistrationsPage() {
     const { currentUser } = useAuth();
-    const { registrations, removeRegistration } = useRegistrations();
+    const { registrations, removeRegistration, loading } = useRegistrations();
     const [removingId, setRemovingId] = useState(null);
 
     const handleDeregister = async (id) => {
@@ -22,6 +22,20 @@ export default function MyRegistrationsPage() {
             setRemovingId(null);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="max-w-4xl mx-auto space-y-4 py-10">
+                {[1, 2, 3].map(i => (
+                    <div key={i} className="bg-white border border-slate-200 rounded-3xl p-8 animate-pulse">
+                        <div className="h-6 bg-slate-100 rounded-xl w-2/3 mb-4" />
+                        <div className="h-4 bg-slate-50 rounded-lg w-1/3 mb-2" />
+                        <div className="h-4 bg-slate-50 rounded-lg w-1/2" />
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
     return (
         <motion.div
@@ -42,6 +56,28 @@ export default function MyRegistrationsPage() {
                     <Bookmark size={24} className="text-indigo-600" />
                 </div>
             </div>
+
+            {/* Quick Stats */}
+            {registrations.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                        <div className="text-2xl font-extrabold text-indigo-600">{registrations.length}</div>
+                        <div className="text-xs font-bold text-slate-400 uppercase mt-1">Registrations</div>
+                    </div>
+                    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                        <div className="text-2xl font-extrabold text-emerald-600">
+                            {new Set(registrations.map(r => r.club)).size}
+                        </div>
+                        <div className="text-xs font-bold text-slate-400 uppercase mt-1">Different Clubs</div>
+                    </div>
+                    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hidden sm:block">
+                        <div className="text-2xl font-extrabold text-purple-600">
+                            {registrations.filter(r => new Date(r.date) >= new Date()).length}
+                        </div>
+                        <div className="text-xs font-bold text-slate-400 uppercase mt-1">Upcoming</div>
+                    </div>
+                </div>
+            )}
 
             <AnimatePresence>
                 {registrations.length === 0 ? (
@@ -68,37 +104,45 @@ export default function MyRegistrationsPage() {
                     <div className="grid gap-5">
                         {registrations.map((reg, i) => (
                             <motion.article
-                                key={reg.id}
+                                key={reg.registration_id || reg.id}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.1 }}
+                                transition={{ delay: i * 0.08 }}
                                 className="bg-white backdrop-blur-xl border border-slate-200 p-6 sm:p-8 rounded-3xl flex flex-col sm:flex-row gap-6 hover:border-indigo-300 transition-colors group relative overflow-hidden shadow-sm hover:shadow-[0_8px_30px_rgb(79,70,229,0.08)]"
                             >
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-3xl group-hover:bg-indigo-100 transition-colors pointer-events-none" />
 
                                 <div className="flex-1 space-y-5 relative z-10">
                                     <div className="space-y-2">
-                                        <h3 className="text-xl font-extrabold text-slate-800 group-hover:text-indigo-700 transition-colors tracking-tight">
-                                            {reg.workshopTitle}
-                                        </h3>
-                                        <div className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wide shadow-sm">
-                                            {reg.club}
+                                        <Link to={`/workshop/${reg.workshop_id}`}>
+                                            <h3 className="text-xl font-extrabold text-slate-800 group-hover:text-indigo-700 transition-colors tracking-tight hover:underline decoration-indigo-300 underline-offset-2">
+                                                {reg.workshopTitle}
+                                            </h3>
+                                        </Link>
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wide shadow-sm">
+                                                {reg.club}
+                                            </span>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm text-slate-600 font-medium">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-                                                <span className="text-xs font-black text-slate-400">@</span>
+                                        {reg.date && (
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+                                                    <Calendar size={12} className="text-indigo-500" />
+                                                </div>
+                                                <span className="truncate">{new Date(reg.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                             </div>
-                                            <span className="truncate">{reg.attendeeName}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-                                                <Mail size={12} className="text-purple-500" />
+                                        )}
+                                        {reg.location && (
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+                                                    <MapPin size={12} className="text-purple-500" />
+                                                </div>
+                                                <span className="truncate">{reg.location}</span>
                                             </div>
-                                            <span className="truncate">{reg.attendeeEmail}</span>
-                                        </div>
+                                        )}
                                         {reg.dept && (
                                             <div className="flex items-center gap-2.5">
                                                 <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
@@ -123,7 +167,7 @@ export default function MyRegistrationsPage() {
                                         Booked On
                                     </span>
                                     <span className="text-sm font-extrabold text-slate-700">
-                                        {new Date(reg.createdAt).toLocaleDateString('en-US', {
+                                        {new Date(reg.created_at).toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric',
                                             year: 'numeric'

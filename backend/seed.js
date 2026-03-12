@@ -1,11 +1,11 @@
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+const db = require('./config/firebase'); // ✅ changed from ./config/db
 
 const workshops = [
     {
         title: "AI & Machine Learning Kickoff",
+        description: "Dive into the world of artificial intelligence! This beginner-friendly workshop covers Python, TensorFlow, and the fundamentals of neural networks with hands-on exercises.",
         club: "AI Society",
-        date: "2024-03-25",
+        date: "2026-03-20",
         time: "4:00 PM - 6:00 PM",
         location: "Tech Lab 3",
         durationHours: 2,
@@ -16,8 +16,9 @@ const workshops = [
     },
     {
         title: "Advanced React Patterns",
+        description: "Master advanced React patterns including custom hooks, render props, compound components, and performance optimization strategies used in production apps.",
         club: "Web Dev Club",
-        date: "2024-03-28",
+        date: "2026-03-22",
         time: "5:00 PM - 8:00 PM",
         location: "CS Building, Room 101",
         durationHours: 3,
@@ -28,8 +29,9 @@ const workshops = [
     },
     {
         title: "Hackathon Prep & Teambuilding",
+        description: "Get ready for upcoming hackathons! Learn ideation techniques, effective pitching, team dynamics, and rapid prototyping workflows.",
         club: "Hackers Group",
-        date: "2024-04-02",
+        date: "2026-03-25",
         time: "2:00 PM - 4:00 PM",
         location: "Innovation Hub",
         durationHours: 2,
@@ -40,10 +42,11 @@ const workshops = [
     },
     {
         title: "Introduction to Cloud Computing",
+        description: "Explore AWS, Azure, and Google Cloud fundamentals. Learn to deploy applications, manage services, and understand cloud architecture principles.",
         club: "Cloud Enthusiasts",
-        date: "2024-04-10",
+        date: "2026-04-01",
         time: "3:00 PM - 5:00 PM",
-        location: "Online",
+        location: "Online (Zoom)",
         durationHours: 2,
         capacity: 200,
         registered: 45,
@@ -52,8 +55,9 @@ const workshops = [
     },
     {
         title: "UI/UX Design for Developers",
+        description: "Bridge the gap between design and development. Learn Figma basics, design system creation, accessibility best practices, and user-centered design thinking.",
         club: "Design Hub",
-        date: "2024-04-15",
+        date: "2026-04-05",
         time: "4:30 PM - 6:30 PM",
         location: "Design Studio A",
         durationHours: 2,
@@ -65,39 +69,32 @@ const workshops = [
 ];
 
 async function seedDatabase() {
-    console.log("Connecting to database to seed workshops...");
-
-    // We create a temporary connection to ensure the DB exists if possible, but assuming it exists is safer based on user intent
-    const connection = await mysql.createConnection({
-        host: process.env.DB_HOST || 'localhost',
-        port: process.env.DB_PORT || 3306,
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '',
-        database: process.env.DB_NAME || 'workshop_management'
-    });
+    console.log("🌱 Seeding Firestore with demo workshops...");
 
     try {
-        console.log("Connected successfully. Clearing old workshops...");
-        // Clear existing workshops purely for seeding
-        await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-        await connection.query('TRUNCATE table workshops');
-        await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+        const batch = db.batch();
+        const workshopsRef = db.collection('workshops');
 
-        console.log("Inserting new workshops...");
+        // Clear existing workshops first (be careful in production!)
+        const snapshot = await workshopsRef.get();
+        snapshot.forEach(doc => batch.delete(doc.ref));
+
+        console.log(`🗑️  Cleared ${snapshot.size} old workshops.`);
 
         for (const w of workshops) {
-            await connection.query(
-                `INSERT INTO workshops (title, club, date, time, location, durationHours, capacity, registered, level, topics) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [w.title, w.club, w.date, w.time, w.location, w.durationHours, w.capacity, w.registered, w.level, JSON.stringify(w.topics)]
-            );
+            const newDocRef = workshopsRef.doc();
+            batch.set(newDocRef, {
+                ...w,
+                created_at: new Date().toISOString(),
+                created_by: null
+            });
         }
 
-        console.log("Database seeded successfully with initial workshops!");
+        await batch.commit();
+        console.log(`✅ Successfully seeded ${workshops.length} workshops!`);
     } catch (err) {
-        console.error("Error seeding database:", err);
+        console.error("❌ Error seeding database:", err.message);
     } finally {
-        await connection.end();
         process.exit();
     }
 }

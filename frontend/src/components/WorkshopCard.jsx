@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Users, Zap, CheckCircle2 } from 'lucide-react';
 import { formatDate, getRelativeStatus } from '../utils/dateUtils';
 import { clsx } from "clsx";
@@ -34,9 +35,11 @@ export default function WorkshopCard({ w, onRegisterClick }) {
 
             <div className="flex justify-between items-start gap-4 relative z-10">
                 <div className="space-y-2 flex-1">
-                    <h3 className="text-[17px] font-bold text-slate-800 leading-tight group-hover:text-indigo-900 transition-colors">
-                        {w.title}
-                    </h3>
+                    <Link to={`/workshop/${w.id}`} className="block">
+                        <h3 className="text-[17px] font-bold text-slate-800 leading-tight group-hover:text-indigo-900 transition-colors hover:underline decoration-indigo-300 underline-offset-2">
+                            {w.title}
+                        </h3>
+                    </Link>
                     <div className="flex flex-wrap gap-2">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm">
                             <Zap size={12} className="text-indigo-500" />
@@ -59,6 +62,13 @@ export default function WorkshopCard({ w, onRegisterClick }) {
                     {isFull ? "Full capacity" : status}
                 </span>
             </div>
+
+            {/* Description preview */}
+            {w.description && (
+                <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 relative z-10">
+                    {w.description}
+                </p>
+            )}
 
             <div className="space-y-4 relative z-10">
                 <div className="grid grid-cols-2 gap-3 text-[13px] text-slate-600 font-medium">
@@ -112,20 +122,28 @@ export default function WorkshopCard({ w, onRegisterClick }) {
                 )}>
                     {!isFull && `${w.capacity - w.registered} spot${w.capacity - w.registered === 1 ? '' : 's'} remaining`}
                 </span>
-                <button
-                    type="button"
-                    disabled={isFull}
-                    onClick={() => onRegisterClick(w)}
-                    className={cn(
-                        "relative inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 overflow-hidden group/btn shadow-sm",
-                        isFull
-                            ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-                            : "bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-[0_8px_20px_rgba(79,70,229,0.25)] hover:-translate-y-[1px]"
-                    )}
-                >
-                    {!isFull && <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />}
-                    <span className="relative">Register Now</span>
-                </button>
+                <div className="flex gap-2">
+                    <Link
+                        to={`/workshop/${w.id}`}
+                        className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+                    >
+                        Details
+                    </Link>
+                    <button
+                        type="button"
+                        disabled={isFull}
+                        onClick={() => onRegisterClick(w)}
+                        className={cn(
+                            "relative inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 overflow-hidden group/btn shadow-sm",
+                            isFull
+                                ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                                : "bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-[0_8px_20px_rgba(79,70,229,0.25)] hover:-translate-y-[1px]"
+                        )}
+                    >
+                        {!isFull && <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />}
+                        <span className="relative">Register</span>
+                    </button>
+                </div>
             </div>
         </motion.article>
     );

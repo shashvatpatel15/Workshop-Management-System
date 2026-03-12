@@ -1,163 +1,253 @@
-const db = require('../config/db');
+const db = require('../config/firebase');
 
-// Add a workshop (assuming colleague or admin can do this, but for now open it up or just keep it simple)
+/* CREATE WORKSHOP */
 exports.createWorkshop = async (req, res) => {
-    const { title, club, date, time, location, durationHours, capacity, level, topics } = req.body;
+    const { title, description, club, date, time, location, durationHours, capacity, level, topics } = req.body;
+
+    if (!title || !club || !date || !time || !location || !durationHours || !capacity || !level) {
+        return res.status(400).json({ message: 'All required fields must be provided' });
+    }
+
+    if (capacity < 1 || durationHours < 1) {
+        return res.status(400).json({ message: 'Capacity and duration must be positive numbers' });
+    }
+
     try {
-        const [result] = await db.query(
-            `INSERT INTO workshops (title, club, date, time, location, durationHours, capacity, level, topics, created_by) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [title, club, date, time, location, durationHours, capacity, level, JSON.stringify(topics), req.user.id]
-        );
-        res.status(201).json({ message: 'Workshop created successfully', workshopId: result.insertId });
+        const workshopDoc = await db.collection('workshops').add({
+            title,
+            description: description || '',
+            club,
+            date,
+            time,
+            location,
+            durationHours: parseInt(durationHours),
+            capacity: parseInt(capacity),
+            registered: 0,
+            level,
+            topics: topics || [],
+            created_by: req.user.id,
+            created_at: new Date().toISOString()
+        });
+
+        res.status(201).json({ message: 'Workshop created successfully', workshopId: workshopDoc.id });
     } catch (err) {
-        console.error(err.message);
+        console.error('Create workshop error:', err.message);
         res.status(500).json({ message: 'Server error' });
     }
 };
 
-// Get all workshops publicly accessible
+/* GET ALL WORKSHOPS */
 exports.getAllWorkshops = async (req, res) => {
     try {
-        const [workshops] = await db.query('SELECT * FROM workshops ORDER BY date ASC');
-        // Parse topics cleanly
-        const mapped = workshops.map(w => ({
+        const snapshot = await db.collection('workshops').orderBy('date', 'asc').get();
+
+        if (snapshot.empty) return res.json([]);
+
+        const workshops = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Collect unique organizer IDs and batch fetch in parallel
+        const organizerIds = [...new Set(workshops.map(w => w.created_by).filter(Boolean))];
+        const organizerMap = {};
+
+        if (organizerIds.length > 0) {
+            const userFetches = organizerIds.map(id => db.collection('users').doc(id).get());
+            const userDocs = await Promise.all(userFetches);
+            userDocs.forEach(doc => {
+                if (doc.exists) organizerMap[doc.id] = doc.data().name;
+            });
+        }
+
+        const result = workshops.map(w => ({
             ...w,
-            topics: typeof w.topics === 'string' ? JSON.parse(w.topics) : w.topics || []
+            organizer_name: organizerMap[w.created_by] || null
         }));
-        res.json(mapped);
+
+        res.json(result);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server error check database connection' });
+        console.error('Get workshops error:', err.message);
+        res.status(500).json({ message: 'Server error — check Firebase connection' });
     }
 };
 
+/* GET SINGLE WORKSHOP */
+exports.getWorkshopById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const doc = await db.collection('workshops').doc(id).get();
+
+        if (!doc.exists) {
+            return res.status(404).json({ message: 'Workshop not found' });
+        }
+
+        const data = doc.data();
+        let organizer_name = null;
+
+        if (data.created_by) {
+            const userDoc = await db.collection('users').doc(data.created_by).get();
+            if (userDoc.exists) organizer_name = userDoc.data().name;
+        }
+
+        res.json({ id: doc.id, ...data, organizer_name });
+    } catch (err) {
+        console.error('Get workshop error:', err.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+/* UPDATE WORKSHOP */
 exports.updateWorkshop = async (req, res) => {
     const { id } = req.params;
-    const { title, club, date, time, location, durationHours, capacity, level, topics } = req.body;
-    try {
-        const [workshops] = await db.query('SELECT created_by FROM workshops WHERE id = ?', [id]);
-        if (workshops.length === 0) return res.status(404).json({ message: 'Workshop not found' });
+    const { title, description, club, date, time, location, durationHours, capacity, level, topics } = req.body;
 
-        if (workshops[0].created_by !== req.user.id && req.user.role !== 'admin') {
+    try {
+        const docRef = db.collection('workshops').doc(id);
+        const doc = await docRef.get();
+
+        if (!doc.exists) return res.status(404).json({ message: 'Workshop not found' });
+
+        if (doc.data().created_by !== req.user.id) {
             return res.status(403).json({ message: 'Not authorized to update this workshop' });
         }
 
-        await db.query(
-            `UPDATE workshops SET title = ?, club = ?, date = ?, time = ?, location = ?, durationHours = ?, capacity = ?, level = ?, topics = ? WHERE id = ?`,
-            [title, club, date, time, location, durationHours, capacity, level, JSON.stringify(topics), id]
-        );
+        // Only update fields that were actually provided
+        const updates = {};
+        if (title !== undefined) updates.title = title;
+        if (description !== undefined) updates.description = description || '';
+        if (club !== undefined) updates.club = club;
+        if (date !== undefined) updates.date = date;
+        if (time !== undefined) updates.time = time;
+        if (location !== undefined) updates.location = location;
+        if (durationHours !== undefined) updates.durationHours = parseInt(durationHours);
+        if (capacity !== undefined) updates.capacity = parseInt(capacity);
+        if (level !== undefined) updates.level = level;
+        if (topics !== undefined) updates.topics = topics || [];
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ message: 'No fields to update' });
+        }
+
+        await docRef.update(updates);
+
         res.json({ message: 'Workshop updated successfully' });
     } catch (err) {
-        console.error(err.message);
+        console.error('Update workshop error:', err.message);
         res.status(500).json({ message: 'Server error' });
     }
 };
 
+/* DELETE WORKSHOP */
 exports.deleteWorkshop = async (req, res) => {
     const { id } = req.params;
     try {
-        const [workshops] = await db.query('SELECT created_by FROM workshops WHERE id = ?', [id]);
-        if (workshops.length === 0) return res.status(404).json({ message: 'Workshop not found' });
+        const docRef = db.collection('workshops').doc(id);
+        const doc = await docRef.get();
 
-        if (workshops[0].created_by !== req.user.id && req.user.role !== 'admin') {
+        if (!doc.exists) return res.status(404).json({ message: 'Workshop not found' });
+
+        if (doc.data().created_by !== req.user.id) {
             return res.status(403).json({ message: 'Not authorized to delete this workshop' });
         }
 
-        await db.query('DELETE FROM workshops WHERE id = ?', [id]);
+        const regsSnapshot = await db.collection('registrations')
+            .where('workshop_id', '==', id)
+            .get();
+
+        // Commit in chunks of 499 to stay under 500 op batch limit
+        const allRefs = regsSnapshot.docs.map(d => d.ref);
+        const chunkSize = 499;
+
+        for (let i = 0; i < allRefs.length; i += chunkSize) {
+            const batch = db.batch();
+            allRefs.slice(i, i + chunkSize).forEach(ref => batch.delete(ref));
+            await batch.commit();
+        }
+
+        // Delete workshop in its own batch
+        await docRef.delete();
+
         res.json({ message: 'Workshop deleted successfully' });
     } catch (err) {
-        console.error(err.message);
+        console.error('Delete workshop error:', err.message);
         res.status(500).json({ message: 'Server error' });
     }
 };
 
+/* GET WORKSHOP REGISTRANTS (organizer only) */
 exports.getWorkshopRegistrants = async (req, res) => {
     const { id } = req.params;
     try {
-        const [workshops] = await db.query('SELECT created_by FROM workshops WHERE id = ?', [id]);
-        if (workshops.length === 0) return res.status(404).json({ message: 'Workshop not found' });
+        const doc = await db.collection('workshops').doc(id).get();
+        if (!doc.exists) return res.status(404).json({ message: 'Workshop not found' });
 
-        if (workshops[0].created_by !== req.user.id && req.user.role !== 'admin') {
+        if (doc.data().created_by !== req.user.id) {
             return res.status(403).json({ message: 'Not authorized to view registrants' });
         }
 
-        const [registrants] = await db.query(`
-            SELECT r.id, r.dept, r.year, r.notes, r.created_at, u.name as attendeeName, u.email as attendeeEmail
-            FROM registrations r
-            JOIN users u ON r.user_id = u.id
-            WHERE r.workshop_id = ?
-            ORDER BY r.created_at DESC
-        `, [id]);
+        const regsSnapshot = await db.collection('registrations')
+            .where('workshop_id', '==', id)
+            .get();
+
+        if (regsSnapshot.empty) return res.json([]);
+
+        const regsData = regsSnapshot.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        // Batch fetch all attendee user docs in parallel
+        const userIds = [...new Set(regsData.map(r => r.user_id).filter(Boolean))];
+        const userMap = {};
+
+        if (userIds.length > 0) {
+            const userFetches = userIds.map(uid => db.collection('users').doc(uid).get());
+            const userDocs = await Promise.all(userFetches);
+            userDocs.forEach(userDoc => {
+                if (userDoc.exists) userMap[userDoc.id] = userDoc.data();
+            });
+        }
+
+        const registrants = regsData.map(reg => {
+            const user = userMap[reg.user_id] || {};
+            return {
+                id: reg.id,
+                dept: reg.dept,
+                year: reg.year,
+                notes: reg.notes,
+                created_at: reg.created_at,
+                attendeeName: user.name || 'Unknown',
+                attendeeEmail: user.email || ''
+            };
+        });
 
         res.json(registrants);
     } catch (err) {
-        console.error(err.message);
+        console.error('Get registrants error:', err.message);
         res.status(500).json({ message: 'Server error' });
     }
 };
 
-exports.updateWorkshop = async (req, res) => {
-    const { id } = req.params;
-    const { title, club, date, time, location, durationHours, capacity, level, topics } = req.body;
+/* GET STATS (admin dashboard) */
+exports.getStats = async (req, res) => {
     try {
-        const [workshops] = await db.query('SELECT created_by FROM workshops WHERE id = ?', [id]);
-        if (workshops.length === 0) return res.status(404).json({ message: 'Workshop not found' });
+        const [workshopsSnapshot, usersSnapshot, regsSnapshot] = await Promise.all([
+            db.collection('workshops').get(),
+            db.collection('users').get(),
+            db.collection('registrations').get()
+        ]);
 
-        if (workshops[0].created_by !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized to update this workshop' });
-        }
+        const today = new Date().toISOString().split('T')[0];
+        let upcomingCount = 0;
+        workshopsSnapshot.forEach(doc => {
+            if (doc.data().date >= today) upcomingCount++;
+        });
 
-        await db.query(
-            `UPDATE workshops SET title = ?, club = ?, date = ?, time = ?, location = ?, durationHours = ?, capacity = ?, level = ?, topics = ? WHERE id = ?`,
-            [title, club, date, time, location, durationHours, capacity, level, JSON.stringify(topics), id]
-        );
-        res.json({ message: 'Workshop updated successfully' });
+        res.json({
+            totalWorkshops: workshopsSnapshot.size,
+            totalUsers: usersSnapshot.size,
+            totalRegistrations: regsSnapshot.size,
+            upcomingWorkshops: upcomingCount
+        });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
-
-exports.deleteWorkshop = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const [workshops] = await db.query('SELECT created_by FROM workshops WHERE id = ?', [id]);
-        if (workshops.length === 0) return res.status(404).json({ message: 'Workshop not found' });
-
-        if (workshops[0].created_by !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized to delete this workshop' });
-        }
-
-        await db.query('DELETE FROM workshops WHERE id = ?', [id]);
-        res.json({ message: 'Workshop deleted successfully' });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
-
-exports.getWorkshopRegistrants = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const [workshops] = await db.query('SELECT created_by FROM workshops WHERE id = ?', [id]);
-        if (workshops.length === 0) return res.status(404).json({ message: 'Workshop not found' });
-
-        if (workshops[0].created_by !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized to view registrants' });
-        }
-
-        const [registrants] = await db.query(`
-            SELECT r.id, r.dept, r.year, r.notes, r.created_at, u.name, u.email
-            FROM registrations r
-            JOIN users u ON r.user_id = u.id
-            WHERE r.workshop_id = ?
-            ORDER BY r.created_at DESC
-        `, [id]);
-
-        res.json(registrants);
-    } catch (err) {
-        console.error(err.message);
+        console.error('Get stats error:', err.message);
         res.status(500).json({ message: 'Server error' });
     }
 };

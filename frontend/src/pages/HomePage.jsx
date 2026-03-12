@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, X, Grid, LayoutList, Calendar, Users, Tag } from "lucide-react";
+import { Search, Filter, X, Grid, LayoutList, Calendar, Users, Tag, Sparkles, TrendingUp } from "lucide-react";
 import WorkshopCard from "../components/WorkshopCard";
 import RegistrationModal from "../components/RegistrationModal";
 import { isUpcoming, isThisWeek, isThisMonth } from "../utils/dateUtils";
@@ -15,9 +15,33 @@ function cn(...inputs) {
     return twMerge(clsx(inputs));
 }
 
+function SkeletonCard() {
+    return (
+        <div className="p-5 rounded-2xl border border-slate-200 bg-white animate-pulse space-y-4">
+            <div className="flex justify-between">
+                <div className="space-y-2 flex-1">
+                    <div className="h-5 bg-slate-100 rounded-lg w-3/4" />
+                    <div className="h-4 bg-slate-50 rounded-lg w-1/3" />
+                </div>
+                <div className="h-6 bg-slate-100 rounded-full w-20 shrink-0" />
+            </div>
+            <div className="space-y-2">
+                <div className="h-3 bg-slate-50 rounded w-1/2" />
+                <div className="h-3 bg-slate-50 rounded w-2/3" />
+            </div>
+            <div className="h-2 bg-slate-100 rounded-full w-full" />
+            <div className="flex gap-2">
+                <div className="h-5 bg-slate-50 rounded w-16" />
+                <div className="h-5 bg-slate-50 rounded w-20" />
+            </div>
+        </div>
+    );
+}
+
 export default function HomePage() {
     const [workshopsList, setWorkshopsList] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState(null);
 
     const [search, setSearch] = useState("");
     const [club, setClub] = useState("all");
@@ -33,17 +57,21 @@ export default function HomePage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchWorkshops = async () => {
+        const fetchData = async () => {
             try {
-                const res = await api.get('/workshops');
-                setWorkshopsList(res.data);
+                const [workshopsRes, statsRes] = await Promise.all([
+                    api.get('/workshops'),
+                    api.get('/workshops/stats').catch(() => ({ data: null }))
+                ]);
+                setWorkshopsList(workshopsRes.data);
+                setStats(statsRes.data);
             } catch (err) {
                 console.error("Failed to fetch workshops data", err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchWorkshops();
+        fetchData();
     }, []);
 
     const clubs = useMemo(
@@ -53,7 +81,7 @@ export default function HomePage() {
 
     const topics = useMemo(() => {
         const set = new Set();
-        workshopsList.forEach((w) => w.topics.forEach((t) => set.add(t)));
+        workshopsList.forEach((w) => (w.topics || []).forEach((t) => set.add(t)));
         return Array.from(set).sort();
     }, [workshopsList]);
 
@@ -66,7 +94,8 @@ export default function HomePage() {
                     !(
                         w.title.toLowerCase().includes(q) ||
                         w.club.toLowerCase().includes(q) ||
-                        w.topics.join(" ").toLowerCase().includes(q)
+                        (w.description || '').toLowerCase().includes(q) ||
+                        (w.topics || []).join(" ").toLowerCase().includes(q)
                     )
                 ) {
                     return false;
@@ -76,7 +105,7 @@ export default function HomePage() {
                     return false;
                 }
 
-                if (activeTag && !w.topics.includes(activeTag)) {
+                if (activeTag && !(w.topics || []).includes(activeTag)) {
                     return false;
                 }
 
@@ -137,11 +166,10 @@ export default function HomePage() {
                 notes: notes || null,
             });
 
-            // Optimistically update the local registered count
             setWorkshopsList(prev => prev.map(w => w.id === selectedWorkshop.id ? { ...w, registered: w.registered + 1 } : w));
 
             setSelectedWorkshop(null);
-            setToast("Your registration has been successfully saved to DB!");
+            setToast("Successfully registered! Check 'My Hub' for details.");
         } catch (err) {
             setToastError(typeof err === 'string' ? err : 'Error registering for workshop. Please try again.');
         }
@@ -154,18 +182,28 @@ export default function HomePage() {
             className="space-y-8"
         >
             {/* Hero Section */}
-            <section className="relative overflow-hidden rounded-3xl bg-indigo-600 border border-indigo-700/50 p-8 sm:p-12 shadow-[0_20px_60px_-15px_rgba(79,70,229,0.3)]">
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 border border-indigo-700/50 p-8 sm:p-12 shadow-[0_20px_60px_-15px_rgba(79,70,229,0.3)]">
                 <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-white/10 blur-[80px] pointer-events-none" />
                 <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-300/10 blur-[60px] pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-purple-400/10 blur-[60px] pointer-events-none" />
 
                 <div className="relative z-10 max-w-2xl space-y-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 border border-white/20 rounded-full text-xs font-bold text-white/90 backdrop-blur-sm"
+                    >
+                        <Sparkles size={12} />
+                        {stats ? `${stats.upcomingWorkshops} upcoming workshops` : 'Workshop Hub'}
+                    </motion.div>
+
                     <motion.h1
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight"
                     >
                         Discover Your Next <br />
-                        <span className="text-white drop-shadow-md">
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
                             Breakthrough
                         </span>
                     </motion.h1>
@@ -175,8 +213,30 @@ export default function HomePage() {
                         transition={{ delay: 0.1 }}
                         className="text-lg text-indigo-100 max-w-xl leading-relaxed font-medium"
                     >
-                        Explore hands-on workshops, expert-led sessions, and collaborative learning events across the firm. Upskill and connect.
+                        Explore hands-on workshops, expert-led sessions, and collaborative learning events across campus. Upskill and connect.
                     </motion.p>
+
+                    {stats && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="flex flex-wrap gap-6 pt-2"
+                        >
+                            <div className="text-center">
+                                <div className="text-2xl font-extrabold text-white">{stats.totalWorkshops}</div>
+                                <div className="text-xs text-indigo-200 font-medium">Workshops</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-extrabold text-white">{stats.totalUsers}</div>
+                                <div className="text-xs text-indigo-200 font-medium">Members</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-extrabold text-white">{stats.totalRegistrations}</div>
+                                <div className="text-xs text-indigo-200 font-medium">Registrations</div>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
             </section>
 
@@ -237,23 +297,25 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                    <Tag size={14} className="text-slate-400 mr-1" />
-                    {topics.map((topic) => (
-                        <button
-                            key={topic}
-                            onClick={() => setActiveTag(prev => prev === topic ? null : topic)}
-                            className={cn(
-                                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border shadow-sm",
-                                activeTag === topic
-                                    ? "bg-indigo-50 text-indigo-700 border-indigo-200 shadow-md transform -translate-y-0.5"
-                                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-100"
-                            )}
-                        >
-                            {topic}
-                        </button>
-                    ))}
-                </div>
+                {topics.length > 0 && (
+                    <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                        <Tag size={14} className="text-slate-400 mr-1" />
+                        {topics.map((topic) => (
+                            <button
+                                key={topic}
+                                onClick={() => setActiveTag(prev => prev === topic ? null : topic)}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border shadow-sm",
+                                    activeTag === topic
+                                        ? "bg-indigo-50 text-indigo-700 border-indigo-200 shadow-md transform -translate-y-0.5"
+                                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-100"
+                                )}
+                            >
+                                {topic}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </section>
 
             {/* Results Header */}
@@ -261,7 +323,7 @@ export default function HomePage() {
                 <div>
                     <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Available Sessions</h2>
                     <p className="text-sm text-slate-500 mt-1 font-medium">
-                        {loading ? "Loading workshops from DB..." : filteredWorkshops.length === 0
+                        {loading ? "Loading workshops..." : filteredWorkshops.length === 0
                             ? "No sessions match your applied filters."
                             : `Showing ${filteredWorkshops.length} session${filteredWorkshops.length > 1 ? 's' : ''}`}
                     </p>
@@ -290,26 +352,58 @@ export default function HomePage() {
                 </div>
             </div>
 
+            {/* Loading Skeletons */}
+            {loading && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
+                </div>
+            )}
+
+            {/* Empty state */}
+            {!loading && filteredWorkshops.length === 0 && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center py-16 px-4 text-center bg-slate-50 rounded-3xl border border-slate-200"
+                >
+                    <div className="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center mb-4 shadow-sm">
+                        <Search size={24} className="text-slate-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-2">No workshops found</h3>
+                    <p className="text-sm text-slate-500 max-w-sm mb-4">
+                        Try adjusting your search or filters to find what you're looking for.
+                    </p>
+                    <button
+                        onClick={handleClearFilters}
+                        className="px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-colors"
+                    >
+                        Clear All Filters
+                    </button>
+                </motion.div>
+            )}
+
             {/* Grid rendering */}
-            <motion.div
-                layout
-                className={cn(
-                    "gap-6",
-                    view === 'grid'
-                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                        : "flex flex-col max-w-4xl"
-                )}
-            >
-                <AnimatePresence mode="popLayout">
-                    {filteredWorkshops.map(w => (
-                        <WorkshopCard
-                            key={w.id}
-                            w={w}
-                            onRegisterClick={onRegisterClick}
-                        />
-                    ))}
-                </AnimatePresence>
-            </motion.div>
+            {!loading && filteredWorkshops.length > 0 && (
+                <motion.div
+                    layout
+                    className={cn(
+                        "gap-6",
+                        view === 'grid'
+                            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                            : "flex flex-col max-w-4xl"
+                    )}
+                >
+                    <AnimatePresence mode="popLayout">
+                        {filteredWorkshops.map(w => (
+                            <WorkshopCard
+                                key={w.id}
+                                w={w}
+                                onRegisterClick={onRegisterClick}
+                            />
+                        ))}
+                    </AnimatePresence>
+                </motion.div>
+            )}
 
             {selectedWorkshop && (
                 <RegistrationModal

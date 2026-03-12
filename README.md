@@ -1,50 +1,139 @@
-# Workshop Hub (College Workshop Management)
+# 🎓 Workshop Hub — College Workshop Management System
 
-A simple front-end web app for colleagues to **search workshops from different college clubs** and **register** for the ones they are interested in.
+A full-stack web application that helps college clubs create, manage, and announce workshops while enabling students to discover, register, and track their learning journey — all in one place.
 
-This version is **front-end only** (no server/database). Registrations are stored in the browser's `localStorage` on each device.
+## 🚀 Tech Stack
 
-## How to run
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 18 + Vite, Tailwind CSS, Framer Motion, Chart.js |
+| **Backend** | Node.js + Express.js, JWT Authentication |
+| **Database** | MySQL with mysql2/promise |
+| **Styling** | Tailwind CSS + Custom Design System |
 
-1. Open the project folder:
-   - `d:\MY PROJECTS\Workshop Management System\`
-2. Double-click `index.html` to open it in your browser (Chrome/Edge/etc.).
-3. You should see the **Workshop Hub** interface.
+## ✨ Features
 
-No extra setup, server, or dependencies are needed.
+### For Students (Colleagues)
+- 🔍 **Smart Search & Filters** — Search by title, club, topic, or description; filter by date, organization, and topic tags
+- 📋 **Workshop Discovery** — Browse workshops in grid or list view with real-time capacity tracking
+- 📝 **One-Click Registration** — Register for workshops with department, year, and custom notes
+- 📊 **Personal Analytics** — Track your registration history and activity over time with interactive charts
+- 👤 **Profile Management** — Update name, email, password, or delete account
 
-## Features
+### For Organizers
+- ➕ **Create Workshops** — Full workshop creation with title, description, date, time, location, capacity, level, and topics  
+- ✏️ **Edit & Manage** — Update workshop details or delete workshops  
+- 👥 **View Registrants** — See who registered with their details, department, year, and notes  
+- 📈 **Organizer Analytics** — Capacity fill rates, topic distribution charts  
 
-- **Search bar**  
-  - Search by workshop title, club, or topics.
+### Platform-Wide
+- 🔐 **JWT Authentication** — Secure login and signup with role-based access control
+- 📱 **Fully Responsive** — Mobile hamburger menu, optimized layouts for all screen sizes
+- ⚡ **Real-Time Stats** — Live workshop count, member count, and registration stats on homepage
+- 🎨 **Premium UI** — Glassmorphism, smooth animations, skeleton loaders, toast notifications
+- 🔗 **Shareable Workshop Links** — Each workshop has a dedicated detail page with share functionality
+- 🛡️ **Protected Routes** — Role-based access control for organizer and user features
 
-- **Filters**
-  - Filter by **club** from the dropdown.
-  - Filter by date: **Any date / Upcoming / This week / This month**.
-  - Filter by **topic chips** (e.g. UI/UX, JavaScript, ML, etc.).
+## 📁 Project Structure
 
-- **Workshop cards**
-  - Shows club, level, date & time, location, duration, topics.
-  - Capacity bar with registered vs. total seats.
-  - Remaining spots or **Full** status.
-  - Switch between **grid** and **list** view.
+```
+Workshop Management System/
+├── backend/
+│   ├── config/db.js           # MySQL connection pool
+│   ├── controllers/           # Auth, Workshop, Registration, User controllers
+│   ├── middlewares/           # JWT auth middleware
+│   ├── routes/                # API route definitions
+│   ├── database.sql           # Database schema
+│   ├── seed.js                # Demo data seeder
+│   └── server.js              # Express server entry point
+│
+├── frontend/
+│   ├── src/
+│   │   ├── api/axios.js       # Axios instance with JWT interceptor
+│   │   ├── components/        # TopBar, Footer, WorkshopCard, RegistrationModal, etc.
+│   │   ├── context/           # AuthContext for global auth state
+│   │   ├── hooks/             # useRegistrations, useOrganizedWorkshops
+│   │   ├── pages/             # HomePage, Login, Signup, Profile, Analytics, etc.
+│   │   ├── utils/             # Date formatting utilities
+│   │   └── styles.css         # Global styles + Tailwind
+│   └── index.html             # Entry HTML with SEO meta tags
+│
+└── README.md
+```
 
-- **Registration**
-  - Click **Register** on any open workshop.
-  - Fill in:
-    - Name
-    - College email
-    - Department
-    - Year
-    - Notes (optional)
-  - Registration is saved to `localStorage` on that browser.
-  - A small counter in the footer shows how many registrations have been saved on this device.
+## 🛠️ Setup & Installation
 
-## Notes / Next steps
+### Prerequisites
+- **Node.js** (v16+)
+- **MySQL** (v8+)
 
-- Currently, this is **not connected to a real backend**.  
-  To make it production-ready for your college:
-  - Add a backend (Node/Express, Django, etc.).
-  - Store workshops and registrations in a real database.
-  - Add an admin panel for clubs to create and manage their own workshops.
+### 1. Database Setup
+```sql
+-- Run the SQL file in MySQL Workbench or CLI
+source backend/database.sql;
+```
 
+### 2. Backend Setup
+```bash
+cd backend
+npm install
+```
+
+Create `.env` file (or edit the existing one):
+```env
+PORT=5000
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password_here
+DB_NAME=workshop_management
+JWT_SECRET=your_secret_key_here
+```
+
+Seed demo data (optional):
+```bash
+node seed.js
+```
+
+Start the server:
+```bash
+npm start
+```
+
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The app will be running at `http://localhost:5173`
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/signup` | ❌ | Create new account |
+| POST | `/api/auth/login` | ❌ | Login |
+| GET | `/api/workshops` | ❌ | Get all workshops |
+| GET | `/api/workshops/stats` | ❌ | Get platform stats |
+| GET | `/api/workshops/:id` | ❌ | Get single workshop |
+| POST | `/api/workshops` | ✅ | Create workshop |
+| PUT | `/api/workshops/:id` | ✅ | Update workshop |
+| DELETE | `/api/workshops/:id` | ✅ | Delete workshop |
+| GET | `/api/workshops/:id/registrants` | ✅ | Get registrants |
+| POST | `/api/registrations` | ✅ | Register for workshop |
+| GET | `/api/registrations/me` | ✅ | My registrations |
+| DELETE | `/api/registrations/:id` | ✅ | Deregister |
+| GET | `/api/users/profile` | ✅ | Get profile |
+| PUT | `/api/users/profile` | ✅ | Update profile |
+| DELETE | `/api/users/profile` | ✅ | Delete account |
+| GET | `/api/health` | ❌ | Health check |
+
+## 🎯 Demo Credentials
+
+After running `node seed.js`, sign up with any email to get started. Use `organizer` role to access workshop creation features.
+
+## 📄 License
+
+Built for a hackathon project. MIT License.

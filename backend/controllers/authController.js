@@ -1,55 +1,131 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const db = require('../config/db');
+const db = require("../config/firebase");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
+/* SIGNUP */
 exports.signup = async (req, res) => {
-    const { name, email, password, role } = req.body;
-    try {
-        const [existingUser] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (existingUser.length > 0) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
+  const { name, email, password, role } = req.body;
 
-        const userRole = (role === 'organizer') ? 'organizer' : 'colleague';
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      message: "Name, email and password are required",
+    });
+  }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+  try {
+    const usersRef = db.collection("users");
 
-        const [result] = await db.query(
-            'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-            [name, email, hashedPassword, userRole]
-        );
+    const normalizedEmail = email.toLowerCase().trim();
 
-        const payload = { user: { id: result.insertId, email, role: userRole, name } };
-        const token = jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+    const existingUser = await usersRef
+      .where("email", "==", normalizedEmail)
+      .limit(1)
+      .get();
 
-        res.status(201).json({ token, user: payload.user });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
+    if (!existingUser.empty) {
+      return res.status(400).json({
+        message: "Email already registered",
+      });
     }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = usersRef.doc();
+
+    await newUser.set({
+      name,
+      email: normalizedEmail,
+      password: hashedPassword,
+      role: role || "student",
+      created_at: new Date().toISOString(),
+    });
+
+    const token = jwt.sign(
+      {
+        id: newUser.id,
+        email: normalizedEmail,
+        role: role || "student",
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(201).json({
+      message: "Account created successfully",
+      token,
+      user: {
+        id: newUser.id,
+        name,
+        email: normalizedEmail,
+        role: role || "student",
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
+/* LOGIN */
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (users.length === 0) {
-            return res.status(400).json({ message: 'Invalid Credentials' });
-        }
+  const { email, password } = req.body;
 
-        const user = users[0];
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid Credentials' });
-        }
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "Email and password are required",
+    });
+  }
 
-        const payload = { user: { id: user.id, email: user.email, role: user.role, name: user.name } };
-        const token = jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+  try {
+    const usersRef = db.collection("users");
 
-        res.json({ token, user: payload.user });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const snapshot = await usersRef
+      .where("email", "==", normalizedEmail)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
     }
+
+    const userDoc = snapshot.docs[0];
+    const user = { id: userDoc.id, ...userDoc.data() };
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
