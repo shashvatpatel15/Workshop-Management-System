@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, Users, LogOut, LogIn } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, LogOut, LogIn, PieChart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function TopBar() {
@@ -67,15 +67,30 @@ export default function TopBar() {
                         <span>Create Workshop</span>
                     </Link>
                 )}
+                {currentUser && (
+                    <Link
+                        to="/analytics"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${location.pathname === '/analytics'
+                            ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60'
+                            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-transparent'
+                            }`}
+                    >
+                        <PieChart size={16} />
+                        <span>Analytics</span>
+                    </Link>
+                )}
             </nav>
 
             <div className="flex items-center gap-3">
                 {currentUser ? (
                     <div className="flex items-center gap-2">
-                        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm text-slate-600 shadow-sm">
+                        <Link
+                            to="/profile"
+                            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm text-slate-600 shadow-sm hover:bg-slate-100 transition-colors"
+                        >
                             <Users size={16} className="text-indigo-500" />
                             <span className="font-medium truncate max-w-[120px]">{currentUser.name}</span>
-                        </div>
+                        </Link>
                         <button
                             onClick={handleLogout}
                             className="p-2 rounded-full border border-slate-200 bg-white text-slate-500 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-all shadow-sm"

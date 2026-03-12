@@ -59,6 +59,12 @@ export function AuthProvider({ children }) {
         }
     };
 
+    const updateUser = (updatedUser) => {
+        const newUser = { ...currentUser, ...updatedUser };
+        setCurrentUser(newUser);
+        localStorage.setItem('wms_user', JSON.stringify(newUser));
+    };
+
     const logout = () => {
         setCurrentUser(null);
         localStorage.removeItem('wms_user');
@@ -69,6 +75,7 @@ export function AuthProvider({ children }) {
         currentUser,
         login,
         signup,
+        updateUser,
         logout
     };
 

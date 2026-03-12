@@ -3,8 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRegistrations } from '../hooks/useRegistrations';
 import { Bookmark, Calendar, Building, Mail, FileText, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import OrganizedWorkshopsList from '../components/OrganizedWorkshopsList';
 
 export default function MyRegistrationsPage() {
+    const { currentUser } = useAuth();
     const { registrations, removeRegistration } = useRegistrations();
     const [removingId, setRemovingId] = useState(null);
 
@@ -139,6 +142,10 @@ export default function MyRegistrationsPage() {
                     </div>
                 )}
             </AnimatePresence>
+
+            {currentUser && currentUser.role === 'organizer' && (
+                <OrganizedWorkshopsList />
+            )}
         </motion.div>
     );
 }

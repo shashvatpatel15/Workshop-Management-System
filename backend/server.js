@@ -13,11 +13,13 @@ app.use(express.json());
 const authRoutes = require('./routes/authRoutes');
 const workshopRoutes = require('./routes/workshopRoutes');
 const registrationRoutes = require('./routes/registrationRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workshops', workshopRoutes);
 app.use('/api/registrations', registrationRoutes);
+app.use('/api/users', userRoutes);
 
 // Base route for testing
 app.get('/', (req, res) => {

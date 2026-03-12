@@ -8,5 +8,8 @@ router.get('/', workshopController.getAllWorkshops);
 
 // Protected routes
 router.post('/', auth, workshopController.createWorkshop);
+router.put('/:id', auth, workshopController.updateWorkshop);
+router.delete('/:id', auth, workshopController.deleteWorkshop);
+router.get('/:id/registrants', auth, workshopController.getWorkshopRegistrants);
 
 module.exports = router;

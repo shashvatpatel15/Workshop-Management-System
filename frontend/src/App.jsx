@@ -8,6 +8,9 @@ import MyRegistrationsPage from "./pages/MyRegistrationsPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import CreateWorkshopPage from "./pages/CreateWorkshopPage";
+import EditWorkshopPage from "./pages/EditWorkshopPage";
+import ProfilePage from "./pages/ProfilePage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -34,6 +37,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreateWorkshopPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/edit-workshop/:id"
+                element={
+                  <ProtectedRoute>
+                    <EditWorkshopPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <AnalyticsPage />
                   </ProtectedRoute>
                 }
               />
