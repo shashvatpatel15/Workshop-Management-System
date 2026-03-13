@@ -196,4 +196,4 @@ The backend provides the following main API routes:
 
 ## Deployment
 
-The frontend can be deployed to Vercel or any static hosting service. The backend can be deployed to services like Heroku, Railway, or any Node.js hosting platform. Ensure to set the environment variables in your deployment environment.
+The frontend can be deployed to Vercel or any hosting service. The backend can be deployed to services like Railway, Render or any Node.js hosting platform. Ensure to set the environment variables in your deployment environment.
