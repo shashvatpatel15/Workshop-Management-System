@@ -1,40 +1,77 @@
-# 🎓 Workshop Hub — College Workshop Management System
+# Workshop Management System
 
-A full-stack web application that helps college clubs create, manage, and announce workshops while enabling students to discover, register, and track their learning journey — all in one place.
+<!-- Optional: Add a screenshot or GIF demo here -->
+<!-- ![Workshop Management System Demo](link-to-your-screenshot.png) -->
 
-## 🚀 Tech Stack
+## Table of Contents
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 18 + Vite, Tailwind CSS, Framer Motion, Chart.js |
-| **Backend** | Node.js + Express.js, JWT Authentication |
-| **Database** | Firebase Firestore |
-| **Styling** | Tailwind CSS + Custom Design System |
+*   [Overview](#overview)
+*   [Features](#features)
+    *   [Frontend](#frontend)
+    *   [Backend](#backend)
+*   [Tech Stack](#tech-stack)
+    *   [Frontend](#frontend-1)
+    *   [Backend](#backend-1)
+*   [Project Structure](#project-structure)
+*   [Getting Started](#getting-started)
+    *   [Prerequisites](#prerequisites)
+    *   [Installation](#installation)
+    *   [Environment Variables](#environment-variables)
+    *   [Running Locally](#running-locally)
+*   [API Endpoints Overview](#api-endpoints-overview)
+*   [Deployment](#deployment)
 
-## ✨ Features
+## Overview
 
-### For Students (Colleagues)
-- 🔍 **Smart Search & Filters** — Search by title, club, topic, or description; filter by date, organization, and topic tags
-- 📋 **Workshop Discovery** — Browse workshops in grid or list view with real-time capacity tracking
-- 📝 **One-Click Registration** — Register for workshops with department, year, and custom notes
-- 📊 **Personal Analytics** — Track your registration history and activity over time with interactive charts
-- 👤 **Profile Management** — Update name, email, password, or delete account
+Workshop Management System is a full-stack web application that helps college clubs create, manage, and announce workshops while enabling students to discover, register, and track their learning journey. It features a responsive user interface with modern design, built using React and Tailwind CSS, communicating with a robust Node.js/Express backend API connected to Firebase Firestore.
 
-### For Organizers
-- ➕ **Create Workshops** — Full workshop creation with title, description, date, time, location, capacity, level, and topics  
-- ✏️ **Edit & Manage** — Update workshop details or delete workshops  
-- 👥 **View Registrants** — See who registered with their details, department, year, and notes  
-- 📈 **Organizer Analytics** — Capacity fill rates, topic distribution charts  
+## Features
 
-### Platform-Wide
-- 🔐 **JWT Authentication** — Secure login and signup with role-based access control
-- 📱 **Fully Responsive** — Mobile hamburger menu, optimized layouts for all screen sizes
-- ⚡ **Real-Time Stats** — Live workshop count, member count, and registration stats on homepage
-- 🎨 **Premium UI** — Glassmorphism, smooth animations, skeleton loaders, toast notifications
-- 🔗 **Shareable Workshop Links** — Each workshop has a dedicated detail page with share functionality
-- 🛡️ **Protected Routes** — Role-based access control for organizer and user features
+### Frontend
 
-## 📁 Project Structure
+*   **Dashboard:** Overview of key metrics (workshops, registrations), real-time stats, and user activity.
+*   **Workshop Discovery:** Browse workshops in grid or list view with search and filtering by title, club, topic, or description.
+*   **Registration System:** One-click registration for workshops with department, year, and custom notes.
+*   **Personal Analytics:** Track registration history and activity over time with interactive charts.
+*   **Profile Management:** View and update user profile details, including name, email, and password.
+*   **Organizer Tools:** Create, edit, and manage workshops; view registrants with their details.
+*   **Authentication:** Secure JWT-based login and signup with role-based access control.
+*   **Responsive Design:** UI adapts to different screen sizes (desktop, tablet, mobile).
+*   **Modern UI:** Glassmorphism effects, smooth animations, skeleton loaders, and toast notifications.
+
+### Backend
+
+*   **RESTful API:** Built with Express.js and Node.js.
+*   **Authentication & Authorization:** JWT-based authentication middleware to protect routes. Handles user registration and login.
+*   **Database:** Firebase Firestore for data storage and real-time updates.
+*   **CRUD Operations:** API endpoints for managing Workshops, Registrations, and User Profiles.
+*   **Error Handling:** Centralized error handling middleware.
+*   **Environment Variables:** Configuration managed via `.env` files.
+
+## Tech Stack
+
+### Frontend
+
+*   **React:** JavaScript library for building user interfaces.
+*   **Vite:** Build tool for fast development and optimized production builds.
+*   **Tailwind CSS:** Utility-first CSS framework for styling.
+*   **React Context API:** For global state management (Authentication).
+*   **Chart.js & react-chartjs-2:** For data visualization (charts in analytics).
+*   **Framer Motion:** For smooth animations and transitions.
+*   **Axios:** For making HTTP requests to the backend.
+*   **React Router:** For client-side routing.
+
+### Backend
+
+*   **Node.js:** JavaScript runtime environment.
+*   **Express.js:** Web framework for Node.js.
+*   **Firebase Firestore:** NoSQL database for real-time data.
+*   **JSON Web Token (JWT):** For generating authentication tokens.
+*   **bcrypt:** For password hashing.
+*   **cors:** Middleware for enabling Cross-Origin Resource Sharing.
+*   **dotenv:** For loading environment variables from `.env` files.
+
+## Project Structure
 
 ```
 Workshop Management System/
@@ -43,96 +80,120 @@ Workshop Management System/
 │   │   ├── firebase.js        # Firebase Firestore configuration
 │   │   └── serviceAccountKey.json  # Firebase service account key
 │   ├── controllers/           # Auth, Workshop, Registration, User controllers
-│   ├── middlewares/           # JWT auth middleware
+│   ├── middlewares/           # JWT authentication middleware
 │   ├── routes/                # API route definitions
-│   ├── seed.js                # Demo data seeder
-│   └── server.js              # Express server entry point
-│
+│   ├── server.js              # Express server entry point
+│   └── package.json
 ├── frontend/
 │   ├── src/
-│   │   ├── api/axios.js       # Axios instance with JWT interceptor
-│   │   ├── components/        # TopBar, Footer, WorkshopCard, RegistrationModal, etc.
-│   │   ├── context/           # AuthContext for global auth state
-│   │   ├── hooks/             # useRegistrations, useOrganizedWorkshops
-│   │   ├── pages/             # HomePage, Login, Signup, Profile, Analytics, etc.
+│   │   ├── api/
+│   │   │   └── axios.js       # Axios instance with JWT interceptor
+│   │   ├── components/        # Reusable UI components (TopBar, Footer, WorkshopCard, etc.)
+│   │   ├── context/           # React Context files (AuthContext)
+│   │   ├── hooks/             # Custom hooks (useRegistrations, useOrganizedWorkshops)
+│   │   ├── pages/             # Page-level components (HomePage, LoginPage, etc.)
 │   │   ├── utils/             # Date formatting utilities
-│   │   └── styles.css         # Global styles + Tailwind
-│   └── index.html             # Entry HTML with SEO meta tags
-│
+│   │   ├── styles.css         # Global styles + Tailwind
+│   │   ├── App.jsx            # Main application component with routing
+│   │   └── main.jsx           # Entry point
+│   ├── index.html             # Entry HTML with SEO meta tags
+│   ├── package.json
+│   ├── vite.config.js         # Vite configuration
+│   ├── tailwind.config.js     # Tailwind configuration
+│   └── postcss.config.js      # PostCSS configuration
 └── README.md
 ```
 
-## 🛠️ Setup & Installation
+## Getting Started
+
+Follow these instructions to set up and run the project locally.
 
 ### Prerequisites
-- **Node.js** (v16+)
-- **Firebase Project** with Firestore enabled
 
-### 1. Firebase Setup
-1. Create a new Firebase project at [https://console.firebase.google.com/](https://console.firebase.google.com/)
-2. Enable Firestore Database
-3. Go to Project Settings > Service Accounts
-4. Generate a new private key and download the JSON file
-5. Place the JSON file as `backend/config/serviceAccountKey.json`
+*   **Node.js:** v16.x or later recommended (Ensure npm is also installed).
+*   **Firebase Project:** A Firebase project with Firestore enabled.
 
-### 2. Backend Setup
-```bash
-cd backend
-npm install
-```
+### Installation
 
-Create `.env` file (or edit the existing one):
-```env
-PORT=5000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-JWT_SECRET=your_secret_key_here
-```
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repository-url>
+    ```
 
-Seed demo data (optional):
-```bash
-npm run seed
-```
+2.  **Install Backend Dependencies:**
+    ```bash
+    cd backend
+    npm install
+    ```
 
-Start the server:
-```bash
-npm start
-```
+3.  **Install Frontend Dependencies:**
+    ```bash
+    cd ../frontend
+    npm install
+    ```
 
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
+### Environment Variables
 
-The app will be running at `http://localhost:5173`
+Environment variables are required for both the frontend and backend. Create `.env` files in the respective directories and add the necessary variables.
 
-## 📡 API Endpoints
+**1. Backend (`backend/.env`):**
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/auth/signup` | ❌ | Create new account |
-| POST | `/api/auth/login` | ❌ | Login |
-| GET | `/api/workshops` | ❌ | Get all workshops |
-| GET | `/api/workshops/stats` | ❌ | Get platform stats |
-| GET | `/api/workshops/:id` | ❌ | Get single workshop |
-| POST | `/api/workshops` | ✅ | Create workshop |
-| PUT | `/api/workshops/:id` | ✅ | Update workshop |
-| DELETE | `/api/workshops/:id` | ✅ | Delete workshop |
-| GET | `/api/workshops/:id/registrants` | ✅ | Get registrants |
-| POST | `/api/registrations` | ✅ | Register for workshop |
-| GET | `/api/registrations/me` | ✅ | My registrations |
-| DELETE | `/api/registrations/:id` | ✅ | Deregister |
-| GET | `/api/users/profile` | ✅ | Get profile |
-| PUT | `/api/users/profile` | ✅ | Update profile |
-| DELETE | `/api/users/profile` | ✅ | Delete account |
-| GET | `/api/health` | ❌ | Health check |
+   Create a `.env` file in the `/backend` directory:
 
-## 🎯 Demo Credentials
+   ```env
+   PORT=5000
+   NODE_ENV=development
+   FRONTEND_URL=http://localhost:5173
+   JWT_SECRET=<your_strong_jwt_secret>
+   ```
 
-After running `npm run seed`, sign up with any email to get started. Use `organizer` role to access workshop creation features.
+   *   Replace `<your_strong_jwt_secret>` with a secure, random string for signing JWTs.
 
-## 📄 License
+**2. Frontend (`frontend/.env`):**
 
-Built for a hackathon project. MIT License.
+   Create a `.env` file in the `/frontend` directory:
+
+   ```env
+   REACT_APP_API_BASE_URL=http://localhost:5000
+   ```
+
+   *   This should point to where your backend server is running. Use `http://localhost:5000` for local development.
+
+### Running Locally
+
+1.  **Start the Backend Server:**
+    ```bash
+    cd backend
+    npm start
+    ```
+    The backend server should start, typically on port 5000 (or the one specified in `backend/.env`).
+
+2.  **Start the Frontend Development Server:**
+    Open a *new* terminal window/tab.
+    ```bash
+    cd frontend
+    npm run dev
+    ```
+    The frontend development server should start, typically on port 5173, and open the application in your browser.
+
+## API Endpoints Overview
+
+The backend provides the following main API routes:
+
+*   `/api/auth/signup`: (POST) Create a new user account.
+*   `/api/auth/login`: (POST) Log in a user, returns JWT.
+*   `/api/workshops`: (GET, POST) Get all workshops or create a new workshop.
+*   `/api/workshops/:id`: (GET, PUT, DELETE) Get, update, or delete a specific workshop.
+*   `/api/workshops/stats`: (GET) Get platform statistics.
+*   `/api/workshops/:id/registrants`: (GET) Get registrants for a specific workshop.
+*   `/api/registrations`: (POST) Register for a workshop.
+*   `/api/registrations/me`: (GET) Get user's registrations.
+*   `/api/registrations/:id`: (DELETE) Deregister from a workshop.
+*   `/api/users/profile`: (GET, PUT, DELETE) Get, update, or delete user profile.
+*   `/api/health`: (GET) Health check endpoint.
+
+*(Note: Protected routes require JWT authentication).*
+
+## Deployment
+
+The frontend can be deployed to Vercel or any static hosting service. The backend can be deployed to services like Heroku, Railway, or any Node.js hosting platform. Ensure to set the environment variables in your deployment environment.
