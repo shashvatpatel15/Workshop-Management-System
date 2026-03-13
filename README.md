@@ -1,104 +1,107 @@
-# Workshop Management System
+# 🎓 Workshop Management System
 
-A **full-stack web application** that allows college clubs to create and manage workshops while enabling students to discover, register, and track their participation in events.
+![React](https://img.shields.io/badge/Frontend-React-blue)
+![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
+![Express](https://img.shields.io/badge/API-Express-black)
+![Firebase](https://img.shields.io/badge/Database-Firebase-orange)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-The platform provides a **modern dashboard, workshop discovery, registration system, and analytics**, helping both organizers and students manage academic events efficiently.
+A **full-stack web application** that enables college clubs to organize workshops and allows students to explore, register, and track events happening in their college.
 
----
-
-# Overview
-
-The **Workshop Management System** is designed to simplify the organization of college workshops and student participation.
-
-Students can:
-
-* Browse upcoming workshops
-* Register for events
-* Track their registrations
-
-Organizers can:
-
-* Create and manage workshops
-* View participants
-* Analyze engagement statistics
-
-The application uses a **React frontend**, **Node.js/Express backend**, and **Firebase Firestore database**.
+This project demonstrates **modern full-stack development practices**, including authentication, REST APIs, cloud database integration, and deployment.
 
 ---
 
-# Features
+# 🌐 Live Deployment
 
-## Student Features
+Frontend deployed on **Vercel**
+Backend deployed on **Render**
+Database powered by **Firebase Firestore**
 
-* Browse upcoming workshops
-* Search workshops by title, club, or topic
+Example architecture:
+
+User → React Frontend → Express API → Firebase Firestore
+
+---
+
+# ✨ Key Features
+
+## 👨‍🎓 Student Features
+
+* Explore upcoming workshops
+* Search workshops by title or club
 * Register for workshops
-* View personal registration history
-* Track activity using analytics charts
-* Manage personal profile
+* View personal registrations
+* Track participation analytics
+* Manage user profile
 
-## Organizer Features
+## 🧑‍🏫 Organizer Features
 
-* Create and manage workshops
-* Edit or delete workshop details
+* Create new workshops
+* Edit workshop details
+* Delete workshops
 * View workshop participants
-* Monitor workshop statistics
+* Track workshop statistics
 
-## Platform Features
+## 🔐 Platform Features
 
 * Secure **JWT authentication**
-* Role-based access control
+* Password hashing with **bcrypt**
 * RESTful API architecture
-* Responsive design for mobile and desktop
-* Modern UI with animations and loaders
+* Responsive UI
+* Modern dashboard interface
 
 ---
 
-# Tech Stack
+# 🛠 Tech Stack
 
 ## Frontend
 
-* **React** – UI development
-* **Vite** – Fast build tool
-* **Tailwind CSS** – Styling framework
-* **React Router** – Routing
-* **Axios** – API communication
-* **Chart.js** – Analytics visualization
-* **Framer Motion** – UI animations
+* React
+* Vite
+* Tailwind CSS
+* React Router
+* Axios
+* Chart.js
+* Framer Motion
 
 ## Backend
 
-* **Node.js** – Runtime environment
-* **Express.js** – Web framework
-* **Firebase Admin SDK** – Firestore access
-* **JWT (JSON Web Tokens)** – Authentication
-* **bcrypt** – Password hashing
-* **cors** – Cross-origin support
-* **dotenv** – Environment variable management
+* Node.js
+* Express.js
+* Firebase Admin SDK
+* JWT Authentication
+* bcrypt
+* cors
+* dotenv
 
 ## Database
 
-* **Firebase Firestore** – NoSQL cloud database
+* Firebase Firestore
 
 ---
 
-# Architecture
+# 🏗 System Architecture
 
-Frontend, backend, and database are deployed on different platforms:
+```
+User
+ ↓
+Frontend (React + Vite)
+ ↓
+Backend API (Node.js + Express)
+ ↓
+Firebase Firestore
+```
+
+Deployment setup:
 
 Frontend → Vercel
 Backend → Render
-Database → Firebase Firestore
-
-Workflow:
-
-User → Frontend (React) → Backend API (Express) → Firebase Firestore
-
-This architecture allows **scalable deployment and independent service management**.
+Database → Firebase
 
 ---
 
-# Project Structure
+# 📂 Project Structure
 
 ```
 Workshop-Management-System
@@ -106,9 +109,22 @@ Workshop-Management-System
 ├── backend
 │   ├── config
 │   │   └── firebase.js
+│   │
 │   ├── controllers
+│   │   ├── authController.js
+│   │   ├── workshopController.js
+│   │   ├── registrationController.js
+│   │   └── userController.js
+│   │
 │   ├── middlewares
+│   │   └── authMiddleware.js
+│   │
 │   ├── routes
+│   │   ├── authRoutes.js
+│   │   ├── workshopRoutes.js
+│   │   ├── registrationRoutes.js
+│   │   └── userRoutes.js
+│   │
 │   ├── server.js
 │   ├── package.json
 │   └── .env
@@ -116,6 +132,7 @@ Workshop-Management-System
 ├── frontend
 │   ├── src
 │   │   ├── api
+│   │   │   └── axios.js
 │   │   ├── components
 │   │   ├── context
 │   │   ├── hooks
@@ -125,109 +142,30 @@ Workshop-Management-System
 │   │   └── main.jsx
 │   │
 │   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
+│   ├── vite.config.js
+│   └── package.json
 │
 └── README.md
 ```
 
 ---
 
-# Getting Started
-
-## Prerequisites
-
-Make sure you have installed:
-
-* Node.js (v16 or higher)
-* npm or yarn
-* A Firebase project with Firestore enabled
-
----
-
-# Installation
-
-## Clone the Repository
-
-```
-git clone https://github.com/your-username/workshop-management-system.git
-```
-
----
-
-## Install Backend Dependencies
-
-```
-cd backend
-npm install
-```
-
----
-
-## Install Frontend Dependencies
-
-```
-cd ../frontend
-npm install
-```
-
----
-
-# Firebase Setup
-
-This project uses **Firebase Firestore** for storing workshop, user, and registration data.
-
-### Step 1 — Create Firebase Project
-
-1. Go to the Firebase Console
-2. Click **Add Project**
-3. Create a new project
-4. Enable **Firestore Database**
-
----
-
-### Step 2 — Generate Firebase Admin Credentials
-
-1. Go to **Project Settings**
-2. Open **Service Accounts**
-3. Click **Generate New Private Key**
-
-This will download a **service account JSON file**.
-
-Do **not commit this file to GitHub**.
-
-Instead, copy values from it into environment variables.
-
----
-
-# Environment Variables
+# ⚙️ Environment Variables
 
 ## Backend `.env`
 
-Create a file:
-
-```
-backend/.env
-```
-
-Add the following variables:
+Create a `.env` file inside `backend`:
 
 ```
 PORT=5000
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
-JWT_SECRET=your_super_secure_secret
+JWT_SECRET=your_secure_secret
 
 FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_KEY\n-----END PRIVATE KEY-----\n"
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk@your-project.iam.gserviceaccount.com
 ```
-
-Important notes:
-
-* Keep quotes around the private key
-* Preserve `\n` characters
-* Never commit `.env` to GitHub
 
 Add to `.gitignore`:
 
@@ -237,11 +175,11 @@ Add to `.gitignore`:
 
 ---
 
-# Firebase Configuration
+# 🔥 Firebase Configuration
 
 `backend/config/firebase.js`
 
-```
+```javascript
 const admin = require("firebase-admin");
 
 admin.initializeApp({
@@ -259,16 +197,33 @@ module.exports = { admin, db };
 
 ---
 
-# Running the Application
+# 🚀 Running Locally
 
-## Start Backend Server
+## Install dependencies
+
+Backend
 
 ```
 cd backend
+npm install
+```
+
+Frontend
+
+```
+cd frontend
+npm install
+```
+
+---
+
+## Start Backend
+
+```
 npm start
 ```
 
-Server will run on:
+Server runs on
 
 ```
 http://localhost:5000
@@ -278,14 +233,11 @@ http://localhost:5000
 
 ## Start Frontend
 
-Open another terminal:
-
 ```
-cd frontend
 npm run dev
 ```
 
-Application will run on:
+Application runs on
 
 ```
 http://localhost:5173
@@ -293,56 +245,73 @@ http://localhost:5173
 
 ---
 
-# API Endpoints
+# 📡 API Endpoints
 
-### Authentication
+## Authentication
 
-POST `/api/auth/signup`
-POST `/api/auth/login`
-
-### Workshops
-
-GET `/api/workshops`
-POST `/api/workshops`
-GET `/api/workshops/:id`
-PUT `/api/workshops/:id`
-DELETE `/api/workshops/:id`
-
-### Registrations
-
-POST `/api/registrations`
-GET `/api/registrations/me`
-DELETE `/api/registrations/:id`
-
-### Users
-
-GET `/api/users/profile`
-PUT `/api/users/profile`
-DELETE `/api/users/profile`
+| Method | Endpoint         | Description       |
+| ------ | ---------------- | ----------------- |
+| POST   | /api/auth/signup | Register new user |
+| POST   | /api/auth/login  | Login user        |
 
 ---
 
-# Deployment
+## Workshops
 
-The application is deployed using:
-
-Frontend → Vercel
-Backend → Render
-Database → Firebase Firestore
-
-Steps:
-
-1. Deploy frontend to Vercel
-2. Deploy backend to Render
-3. Add environment variables in Render
-4. Connect backend API URL in frontend
+| Method | Endpoint           | Description       |
+| ------ | ------------------ | ----------------- |
+| GET    | /api/workshops     | Get all workshops |
+| POST   | /api/workshops     | Create workshop   |
+| GET    | /api/workshops/:id | Get workshop      |
+| PUT    | /api/workshops/:id | Update workshop   |
+| DELETE | /api/workshops/:id | Delete workshop   |
 
 ---
 
-# Security Notes
+## Registrations
 
-* Never commit `.env` files
-* Never upload Firebase service account JSON files
-* Use environment variables in production
-* Always hash passwords using bcrypt
-* Protect routes using JWT authentication
+| Method | Endpoint               | Description            |
+| ------ | ---------------------- | ---------------------- |
+| POST   | /api/registrations     | Register for workshop  |
+| GET    | /api/registrations/me  | Get user registrations |
+| DELETE | /api/registrations/:id | Cancel registration    |
+
+---
+
+## User
+
+| Method | Endpoint           | Description    |
+| ------ | ------------------ | -------------- |
+| GET    | /api/users/profile | Get profile    |
+| PUT    | /api/users/profile | Update profile |
+| DELETE | /api/users/profile | Delete account |
+
+---
+
+# 🔒 Security
+
+* JWT authentication
+* Password hashing using bcrypt
+* Protected API routes
+* Environment variables for secrets
+* Firebase admin authentication
+
+---
+
+# 📈 Future Improvements
+
+Possible enhancements:
+
+* Email notifications for workshop reminders
+* Certificate generation
+* Workshop rating system
+* Admin analytics dashboard
+* Event calendar integration
+
+---
+
+# 📄 License
+
+MIT License
+
+This project is built for **learning and portfolio demonstration purposes**.
