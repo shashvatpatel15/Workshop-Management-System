@@ -295,23 +295,3 @@ http://localhost:5173
 * Protected API routes
 * Environment variables for secrets
 * Firebase admin authentication
-
----
-
-# 📈 Future Improvements
-
-Possible enhancements:
-
-* Email notifications for workshop reminders
-* Certificate generation
-* Workshop rating system
-* Admin analytics dashboard
-* Event calendar integration
-
----
-
-# 📄 License
-
-MIT License
-
-This project is built for **learning and portfolio demonstration purposes**.
