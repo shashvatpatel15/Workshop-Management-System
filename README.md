@@ -16,6 +16,7 @@
 *   [Getting Started](#getting-started)
     *   [Prerequisites](#prerequisites)
     *   [Installation](#installation)
+    *   [Firebase Setup](#firebase-setup)
     *   [Environment Variables](#environment-variables)
     *   [Running Locally](#running-locally)
 *   [API Endpoints Overview](#api-endpoints-overview)
@@ -65,6 +66,7 @@ Workshop Management System is a full-stack web application that helps college cl
 
 *   **Node.js:** JavaScript runtime environment.
 *   **Express.js:** Web framework for Node.js.
+*   **Firebase Admin SDK:** For server-side Firebase authentication and Firestore access.
 *   **Firebase Firestore:** NoSQL database for real-time data.
 *   **JSON Web Token (JWT):** For generating authentication tokens.
 *   **bcrypt:** For password hashing.
@@ -77,8 +79,8 @@ Workshop Management System is a full-stack web application that helps college cl
 Workshop Management System/
 ├── backend/
 │   ├── config/
-│   │   ├── firebase.js        # Firebase Firestore configuration
-│   │   └── serviceAccountKey.json  # Firebase service account key
+│   │   ├── firebase.js             # Firebase Admin SDK initialization
+│   │   └── serviceAccountKey.json  # Firebase service account key (⚠️ DO NOT COMMIT)
 │   ├── controllers/           # Auth, Workshop, Registration, User controllers
 │   ├── middlewares/           # JWT authentication middleware
 │   ├── routes/                # API route definitions
@@ -131,6 +133,60 @@ Follow these instructions to set up and run the project locally.
     cd ../frontend
     npm install
     ```
+
+### Firebase Setup
+
+This project uses the **Firebase Admin SDK** on the backend, which requires a service account key for authentication.
+
+#### Step 1 — Create a Firebase Project
+
+1.  Go to [Firebase Console](https://console.firebase.google.com/) and click **Add project**.
+2.  Follow the prompts to create your project.
+3.  Once created, navigate to **Build → Firestore Database** and click **Create database**.
+4.  Choose **Start in test mode** for development, then select a region and click **Done**.
+
+#### Step 2 — Generate a Service Account Key
+
+1.  In the Firebase Console, click the ⚙️ **gear icon** next to *Project Overview* → **Project settings**.
+2.  Go to the **Service accounts** tab.
+3.  Click **Generate new private key** → **Generate key**.
+4.  A JSON file will be downloaded automatically — this is your service account key.
+
+#### Step 3 — Add the Key to the Project
+
+1.  Rename the downloaded file to `serviceAccountKey.json`.
+2.  Place it inside the `backend/config/` directory:
+
+    ```
+    backend/
+    └── config/
+        ├── firebase.js
+        └── serviceAccountKey.json   ← place it here
+    ```
+
+3.  **Important:** This file contains sensitive credentials. Make sure it is listed in `.gitignore` and **never committed to version control**:
+
+    ```gitignore
+    # .gitignore
+    backend/config/serviceAccountKey.json
+    ```
+
+#### Step 4 — Verify `firebase.js`
+
+Ensure your `backend/config/firebase.js` looks like this:
+
+```js
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+module.exports = { admin, db };
+```
 
 ### Environment Variables
 
@@ -197,3 +253,5 @@ The backend provides the following main API routes:
 ## Deployment
 
 The frontend can be deployed to Vercel or any hosting service. The backend can be deployed to services like Railway, Render or any Node.js hosting platform. Ensure to set the environment variables in your deployment environment.
+
+> ⚠️ **For deployment:** Do not upload `serviceAccountKey.json` to your hosting platform. Instead, use environment variables. Set `FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`, and `FIREBASE_CLIENT_EMAIL` in your deployment environment and update `firebase.js` to read from `process.env` instead of the JSON file.
