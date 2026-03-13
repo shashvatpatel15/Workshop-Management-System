@@ -8,7 +8,7 @@ A full-stack web application that helps college clubs create, manage, and announ
 |-------|-----------|
 | **Frontend** | React 18 + Vite, Tailwind CSS, Framer Motion, Chart.js |
 | **Backend** | Node.js + Express.js, JWT Authentication |
-| **Database** | MySQL with mysql2/promise |
+| **Database** | Firebase Firestore |
 | **Styling** | Tailwind CSS + Custom Design System |
 
 ## ✨ Features
@@ -39,11 +39,12 @@ A full-stack web application that helps college clubs create, manage, and announ
 ```
 Workshop Management System/
 ├── backend/
-│   ├── config/db.js           # MySQL connection pool
+│   ├── config/
+│   │   ├── firebase.js        # Firebase Firestore configuration
+│   │   └── serviceAccountKey.json  # Firebase service account key
 │   ├── controllers/           # Auth, Workshop, Registration, User controllers
 │   ├── middlewares/           # JWT auth middleware
 │   ├── routes/                # API route definitions
-│   ├── database.sql           # Database schema
 │   ├── seed.js                # Demo data seeder
 │   └── server.js              # Express server entry point
 │
@@ -65,13 +66,14 @@ Workshop Management System/
 
 ### Prerequisites
 - **Node.js** (v16+)
-- **MySQL** (v8+)
+- **Firebase Project** with Firestore enabled
 
-### 1. Database Setup
-```sql
--- Run the SQL file in MySQL Workbench or CLI
-source backend/database.sql;
-```
+### 1. Firebase Setup
+1. Create a new Firebase project at [https://console.firebase.google.com/](https://console.firebase.google.com/)
+2. Enable Firestore Database
+3. Go to Project Settings > Service Accounts
+4. Generate a new private key and download the JSON file
+5. Place the JSON file as `backend/config/serviceAccountKey.json`
 
 ### 2. Backend Setup
 ```bash
@@ -82,17 +84,14 @@ npm install
 Create `.env` file (or edit the existing one):
 ```env
 PORT=5000
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_password_here
-DB_NAME=workshop_management
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
 JWT_SECRET=your_secret_key_here
 ```
 
 Seed demo data (optional):
 ```bash
-node seed.js
+npm run seed
 ```
 
 Start the server:
@@ -132,7 +131,7 @@ The app will be running at `http://localhost:5173`
 
 ## 🎯 Demo Credentials
 
-After running `node seed.js`, sign up with any email to get started. Use `organizer` role to access workshop creation features.
+After running `npm run seed`, sign up with any email to get started. Use `organizer` role to access workshop creation features.
 
 ## 📄 License
 
