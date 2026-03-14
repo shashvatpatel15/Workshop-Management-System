@@ -14,6 +14,8 @@ This project demonstrates **modern full-stack development practices**, including
 
 # 🌐 Live Deployment
 
+Live Link: https://join-shoppr.vercel.app/
+
 Frontend deployed on **Vercel**
 Backend deployed on **Render**
 Database powered by **Firebase Firestore**
