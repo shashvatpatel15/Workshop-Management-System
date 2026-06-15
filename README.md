@@ -150,14 +150,12 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 JWT_SECRET=your_secure_secret
 
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_KEY\n-----END PRIVATE KEY-----\n"
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk@your-project.iam.gserviceaccount.com
+FIREBASE_SERVICE_ACCOUNT='{"type": "service_account", "project_id": "your-project-id", ...}'
 ```
 
 ### Important
 
-* Replace `\n` correctly in private key (handled in code)
+* Ensure `FIREBASE_SERVICE_ACCOUNT` is a valid stringified JSON representation of your Firebase service account key.
 * Never commit `.env` file
 
 Add to `.gitignore`:
@@ -173,19 +171,17 @@ Add to `.gitignore`:
 `backend/config/firebase.js`
 
 ```javascript
-const admin = require("firebase-admin");
+const admin = require('firebase-admin');
+
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL
-  })
+  credential: admin.credential.cert(serviceAccount)
 });
 
 const db = admin.firestore();
 
-module.exports = { admin, db };
+module.exports = db;
 ```
 
 ---
