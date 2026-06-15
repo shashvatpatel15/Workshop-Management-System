@@ -293,9 +293,3 @@ http://localhost:5173
 * Workshop feedback & ratings
 * Payment integration
 * Real-time updates
-
----
-
-# 📄 License
-
-This project is licensed under the **MIT License**.
