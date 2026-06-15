@@ -4,23 +4,12 @@
 ![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
 ![Express](https://img.shields.io/badge/API-Express-black)
 ![Firebase](https://img.shields.io/badge/Database-Firebase-orange)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 A **full-stack web application** designed to streamline workshop management in colleges. It enables organizers to create and manage events while allowing students to discover, register, and track their participation.
 
 Built using **modern web technologies**, this project demonstrates scalable architecture, secure authentication, and real-world deployment practices.
 
 ---
-
-# 🌐 Live Demo
-
-🔗 **Live App:** https://workshop-connect.vercel.app/
-
-### Deployment Overview
-
-* **Frontend:** Vercel
-* **Backend:** Render
-* **Database:** Firebase Firestore
 
 ### Architecture Flow
 
